@@ -14,7 +14,7 @@ export default function App() {
       position='right' //posicion del boton, se puede cambiar a left, top, bottom
       />
       <StatusBar style="auto" />
-    </View>
+    </View>//es para que se vea la barra de estado en la parte superior de la pantalla
   );
 }
 
