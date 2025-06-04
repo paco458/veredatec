@@ -1,34 +1,44 @@
-import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import FAB from './components/FAB';
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import Home from "./screens/home";
+import Login from "./screens/Login";
 
 export default function App() {
-  const[count, setCount] = useState(10);
+  const Stack = createNativeStackNavigator();
+  function HomeScreen() {
+    return (
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Login"
+          component={Login}
+          options={{
+            title: "Login", // Title for the Login screen
+            headerTintColor: "#fff", // Color of the header tex
+            headerTitleAlign: "center", // Center the title
+            headerStyle: {
+              backgroundColor: "#f4511e", // Background color of the header
+            },
+          }}
+        />
+        <Stack.Screen
+          name="home"
+          component={Home}
+          options={{
+            title: "Login", // Title for the Login screen
+            headerTintColor: "#fff", // Color of the header tex
+            headerTitleAlign: "center", // Center the title
+            headerStyle: {
+              backgroundColor: "#f4511e", // Background color of the header
+            },
+          }}
+        />
+      </Stack.Navigator>
+    );
+  }
   return (
-    <View style={styles.container}>
-      <Text style={styles.textHude}> {count} </Text>
-      <FAB label='+1'
-      onLongPress={() => setCount(0)}//va a inicializar el contador a 0 cuando se mantenga presionado
-      onPress={() => setCount(count + 1)}//cuando se presiona el boton, se incrementa el contador
-      position='right' //posicion del boton, se puede cambiar a left, top, bottom
-      />
-      <StatusBar style="auto" />
-    </View>//es para que se vea la barra de estado en la parte superior de la pantalla
+    <NavigationContainer>
+      <HomeScreen />
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  textHude: {
-    fontSize: 120,
-    fontWeight: '100',
-  },
-  
-});
