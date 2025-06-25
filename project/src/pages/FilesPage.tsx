@@ -290,7 +290,7 @@ const FilesPage: React.FC = () => {
           onDragOver={handleDragOver}
           onClick={(e) => {
             const target = e.target as HTMLElement;
-            // ✅ Evita conflicto si se hace clic en el <label>
+            // ✅ Evita conflicto si se hace clic en el
             if (target.tagName !== "LABEL" && target.tagName !== "BUTTON") {
               fileInputRef.current?.click();
             }
