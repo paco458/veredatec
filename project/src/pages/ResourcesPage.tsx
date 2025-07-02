@@ -4,7 +4,7 @@ import { EcoResource } from '../types';
 import UserMap from './UserMap';
 import { collection, getDocs,addDoc, deleteDoc, doc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase"; // Asegúrate de tener esta configuración
-
+//XD
 
 const ResourcesPage: React.FC = () => {
   const [selectedType, setSelectedType] = useState<string | null>(null);
