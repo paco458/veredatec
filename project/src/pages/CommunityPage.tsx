@@ -18,7 +18,7 @@ const CommunityPage: React.FC = () => {
       title: 'Limpieza de Playa Costanera Sur',
       description: 'Únete a nosotros para limpiar la costa y proteger la vida marina. Traeremos todos los materiales necesarios.',
       date: new Date(2024, 1, 15, 9, 0),
-      location: 'Costanera Sur, Buenos Aires',
+      location: 'Playa dulce',
       organizer: 'EcoVoluntarios BA',
       type: 'local',
       attendees: ['user1', 'user2', 'user3']
@@ -29,7 +29,7 @@ const CommunityPage: React.FC = () => {
       description: 'Aprende cómo implementar soluciones de energía solar y eólica en tu hogar con expertos del sector.',
       date: new Date(2024, 1, 20, 19, 0),
       location: 'Virtual - Zoom',
-      organizer: 'GreenTech Argentina',
+      organizer: 'GreenTech ',
       type: 'virtual',
       attendees: ['user1', 'user4', 'user5']
     },
@@ -38,7 +38,7 @@ const CommunityPage: React.FC = () => {
       title: 'Plantación de Árboles en Reserva Ecológica',
       description: 'Ayúdanos a reforestar la reserva ecológica. Una actividad perfecta para toda la familia.',
       date: new Date(2024, 1, 25, 8, 30),
-      location: 'Reserva Ecológica Costanera Sur',
+      location: 'Reserva Ecológica ',
       organizer: 'Fundación Verde',
       type: 'local',
       attendees: ['user2', 'user3', 'user6']
@@ -71,14 +71,14 @@ const CommunityPage: React.FC = () => {
   const groups = [
     {
       id: '1',
-      name: 'EcoVoluntarios Buenos Aires',
+      name: 'EcoVoluntarios',
       description: 'Grupo dedicado a actividades de voluntariado ambiental en la ciudad',
       members: 156,
       image: 'https://images.pexels.com/photos/2990644/pexels-photo-2990644.jpeg?w=300&h=200&fit=crop'
     },
     {
       id: '2',
-      name: 'Huertos Urbanos Argentina',
+      name: 'Huertos Urbanos  Sostenibles',
       description: 'Comunidad de personas interesadas en la agricultura urbana y sostenible',
       members: 89,
       image: 'https://images.pexels.com/photos/4503273/pexels-photo-4503273.jpeg?w=300&h=200&fit=crop'
@@ -88,7 +88,7 @@ const CommunityPage: React.FC = () => {
       name: 'Energía Renovable Hogareña',
       description: 'Intercambio de experiencias sobre implementación de energías limpias en el hogar',
       members: 203,
-      image: 'https://images.pexels.com/photos/9875436/pexels-photo-9875436.jpeg?w=300&h=200&fit=crop'
+      image: 'https://images.pexels.com/photos/4503273/pexels-photo-4503273.jpeg?w=300&h=200&fit=crop'
     }
   ];
 

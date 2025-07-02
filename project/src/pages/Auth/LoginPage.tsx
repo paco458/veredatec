@@ -122,7 +122,7 @@ const LoginPage: React.FC = () => {
         {/* Demo Info */}
         <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
           <p className="text-sm text-blue-600 dark:text-blue-400 text-center">
-            <strong>Demo:</strong> Usa cualquier email y contraseña para probar la plataforma
+            <strong>Demo:</strong> Registrate para probar la plataforma
           </p>
         </div>
       </div>

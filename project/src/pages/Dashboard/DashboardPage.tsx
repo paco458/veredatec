@@ -15,7 +15,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 
 const DashboardPage: React.FC = () => {
-  const { user } = useAuth();
+  const { User } = useAuth();
 
   const stats = [
     { label: 'Tu Huella de Carbono', value: '2.4 ton CO₂', change: '-12%', positive: true },
@@ -93,7 +93,7 @@ const DashboardPage: React.FC = () => {
       <div className="bg-gradient-to-r from-green-500 to-blue-600 rounded-2xl p-8 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-2">¡Hola, {user?.email}!</h1>
+            <h1 className="text-3xl font-bold mb-2">¡Hola, Muchas gracias por aportar al cambio!</h1>
             <p className="text-green-100 text-lg">
               Bienvenido a tu dashboard ambiental. Juntos construimos un futuro más sostenible.
             </p>

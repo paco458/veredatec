@@ -1,65 +1,37 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapPin, Search, Plus, Recycle, ShoppingBag, Store, Calendar } from 'lucide-react';
 import { EcoResource } from '../types';
 import UserMap from './UserMap';
+import { collection, getDocs,addDoc, deleteDoc, doc } from "firebase/firestore";
+import { auth, db } from "../lib/firebase"; // Asegúrate de tener esta configuración
+
 
 const ResourcesPage: React.FC = () => {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [resources, setResources] = useState<EcoResource[]>([]);
+  
 
   // Mock resources data
-  const resources: EcoResource[] = [
-    {
-      id: '1',
-      name: 'Centro de Reciclaje Municipal',
-      type: 'recycling',
-      location: {
-        lat: -34.6037,
-        lng: -58.3816,
-        address: 'Av. Corrientes 1234, Buenos Aires'
-      },
-      description: 'Centro especializado en reciclaje de papel, cartón, vidrio y metales.',
-      contact: '+54 11 4444-5555'
-    },
-    {
-      id: '2',
-      name: 'Mercado Orgánico Verde',
-      type: 'organic-market',
-      location: {
-        lat: -34.6118,
-        lng: -58.3960,
-        address: 'San Telmo, Buenos Aires'
-      },
-      description: 'Productos orgánicos locales, frutas y verduras de temporada.',
-      contact: 'mercadoverde@email.com'
-    },
-    {
-      id: '3',
-      name: 'Tienda a Granel Eco',
-      type: 'bulk-store',
-      location: {
-        lat: -34.5875,
-        lng: -58.3974,
-        address: 'Palermo, Buenos Aires'
-      },
-      description: 'Alimentos secos, cereales, legumbres y productos de limpieza sin envases.',
-      contact: '+54 11 5555-6666'
-    },
-    {
-      id: '4',
-      name: 'Limpieza Costera Mensual',
-      type: 'event',
-      location: {
-        lat: -34.5555,
-        lng: -58.4444,
-        address: 'Costanera Norte, Buenos Aires'
-      },
-      description: 'Evento mensual de limpieza de playas y espacios naturales.',
-      contact: 'voluntarios@costera.org'
-    }
-  ];
+  const fetchResources = async () => {
+  const user = auth.currentUser;
+  if (!user) return;
 
+  const snapshot = await getDocs(collection(db, `users/${user.uid}/lugares`));
+  const data = snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as EcoResource[];
+
+  setResources(data);
+};
+
+useEffect(() => {
+  fetchResources();
+}, []);
+
+ 
   const resourceTypes = [
     { key: 'all', label: 'Todos', icon: MapPin, color: 'bg-gray-500' },
     { key: 'recycling', label: 'Reciclaje', icon: Recycle, color: 'bg-green-500' },
@@ -67,6 +39,24 @@ const ResourcesPage: React.FC = () => {
     { key: 'bulk-store', label: 'Tiendas a Granel', icon: Store, color: 'bg-purple-500' },
     { key: 'event', label: 'Eventos', icon: Calendar, color: 'bg-orange-500' }
   ];
+  const handleVerEnMapa = (lat: number, lng: number) => {
+  const url = `https://www.google.com/maps?q=${lat},${lng}`;
+  window.open(url, '_blank');
+  };
+  const handleDelete = async (id: string) => {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  if (confirm("¿Seguro que deseas eliminar este recurso?")) {
+    try {
+      await deleteDoc(doc(db, `users/${user.uid}/lugares/${id}`));
+      fetchResources(); // Vuelve a cargar la lista
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      alert("Error al eliminar el recurso.");
+    }
+  }
+};
 
   const filteredResources = resources.filter(resource => {
     const matchesType = !selectedType || selectedType === 'all' || resource.type === selectedType;
@@ -75,95 +65,155 @@ const ResourcesPage: React.FC = () => {
     return matchesType && matchesSearch;
   });
 
-  const AddResourceForm = () => (
+ const AddResourceForm = ({ onClose, onAdd }: { onClose: () => void; onAdd: () => void }) => {
+  const [name, setName] = useState('');
+  const [type, setType] = useState('recycling');
+  const [address, setAddress] = useState('');
+  const [description, setDescription] = useState('');
+  const [contact, setContact] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const user = auth.currentUser;
+    if (!user) return alert("Debes iniciar sesión para agregar un recurso.");
+
+    setIsSubmitting(true);
+
+    try {
+      const newResource = {
+        name,
+        type,
+        description,
+        contact,
+        location: {
+          address,
+          lat: 0, // puedes integrar geocoding aquí si lo deseas
+          lng: 0
+        }
+      };
+
+      await addDoc(collection(db, `users/${user.uid}/lugares`), newResource);
+      onAdd(); // actualiza lista
+      onClose(); // cierra modal
+    } catch (error) {
+      console.error("Error al agregar recurso:", error);
+      alert("Hubo un error al guardar el recurso.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Agregar Recurso</h3>
           <button
-            onClick={() => setShowAddForm(false)}
+            onClick={onClose}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
             ✕
           </button>
         </div>
-        
-        <form className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Nombre del Lugar
-            </label>
-            <input
-              type="text"
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              placeholder="Ej: Centro de Reciclaje"
-            />
-          </div>
-          
+
+        <form className="space-y-4" onSubmit={handleSubmit}>
+           
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Nombre del Lugar
+        </label>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          type="text"
+          className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          placeholder="Ej: Centro de Reciclaje"
+        />
+      </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Tipo
             </label>
-            <select className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              required
+              className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
               <option value="recycling">Reciclaje</option>
               <option value="organic-market">Mercado Orgánico</option>
               <option value="bulk-store">Tienda a Granel</option>
               <option value="event">Evento</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Dirección
             </label>
             <input
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              required
               type="text"
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="Dirección completa"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Descripción
             </label>
             <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
               rows={3}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="Describe los servicios o productos..."
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Contacto (opcional)
             </label>
             <input
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
               type="text"
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="Teléfono o email"
             />
           </div>
-          
+
           <div className="flex space-x-4 pt-4">
             <button
               type="button"
-              onClick={() => setShowAddForm(false)}
-              className="flex-1 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              onClick={onClose}
+              className="flex-1 px-6 py-3 border text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+              disabled={isSubmitting}
+              className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg"
             >
-              Agregar
+              {isSubmitting ? 'Guardando...' : 'Agregar'}
             </button>
           </div>
         </form>
       </div>
     </div>
   );
+};
+
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -234,7 +284,7 @@ const ResourcesPage: React.FC = () => {
           
         
               <div className="h-64">
-              <UserMap />
+               <UserMap />
                </div>
 
           </div>
@@ -277,14 +327,21 @@ const ResourcesPage: React.FC = () => {
 
               {/* Contact */}
               {resource.contact && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-green-600 dark:text-green-400 font-medium">
-                    {resource.contact}
-                  </span>
-                  <button className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium">
+             <div className="flex items-center justify-between gap-2 mt-4">
+                  <button
+                    onClick={() => handleVerEnMapa(resource.location.lat, resource.location.lng)}
+                    className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium"
+                  >
                     Ver en mapa
                   </button>
+                  <button
+                    onClick={() => handleDelete(resource.id)}
+                    className="text-red-600 dark:text-red-400 hover:underline text-sm font-medium"
+                  >
+                    Eliminar
+                  </button>
                 </div>
+
               )}
             </div>
           );
@@ -306,7 +363,15 @@ const ResourcesPage: React.FC = () => {
       )}
 
       {/* Add Resource Modal */}
-      {showAddForm && <AddResourceForm />}
+      {showAddForm && (
+        <AddResourceForm
+          onClose={() => setShowAddForm(false)}
+          onAdd={() => {
+            // vuelve a cargar los datos desde Firebase
+            fetchResources(); // define fetchResources fuera del useEffect
+          }}
+        />
+      )}
     </div>
   );
 };
